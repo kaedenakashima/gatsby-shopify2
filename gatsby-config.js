@@ -10,8 +10,8 @@ module.exports = {
     {
       resolve: "gatsby-source-shopify",
       options: {
-        shopName: "YOUR_SHOPNAME",
-        accessToken: "YOUR_TOKEN",
+        shopName: "level-up-tuts-test-store-cjkadhsfg",
+        accessToken: "0600aa0d65be9abf0ec2a1271fafb876",
         verbose: true,
         paginationSize: 30,
       },

@@ -1,31 +1,73 @@
-import React, { useContext } from 'react'
-import { StoreContext } from '../../context/StoreContext'
+import React, { useContext } from "react"
+import { animated } from "react-spring"
+import { StoreContext } from "../../context/StoreContext"
 
-const Cart = () => {
-    const { isCartOpen, checkout } = useContext(StoreContext)
+const Cart = ({ style }) => {
+  const {
+    isCartOpen,
+    checkout,
+    toggleCartOpen,
+    removeProductFromCart,
+  } = useContext(StoreContext)
 
-    return (
-        <div
+  return (
+    <animated.div
+      style={{
+        zIndex: 100,
+        position: "fixed",
+        top: 0,
+        right: 0,
+        width: "50%",
+        height: "100%",
+        background: "white",
+        padding: "40px 2%",
+        boxShadow: "var(--elevation-4)",
+        ...style,
+      }}
+    >
+      <button
+        onClick={toggleCartOpen}
+        style={{
+          background: "var(--red)",
+          position: "absolute",
+          top: 10,
+          right: 10,
+        }}
+        className="delete is-large"
+      >
+        Close Cart
+      </button>
+      <h3 className="title">Cart</h3>
+      {checkout.lineItems.map(item => (
+        <div key={item.id} style={{ display: "flex", marginBottom: "2rem" }}>
+          <div
             style={{
-                position: 'fixed',
-                top: 0,
-                right: 0,
-                width: '50%',
-                height: '100%',
-                background: 'white',
-                boxShadow: 'var(--elevation-4)'
+              width: 60,
+              height: 60,
+              overflow: "hidden",
+              marginRight: 10,
             }}
-        >
-            <h3>Cart</h3>
-            {checkout.lineItems.map(item => (
-                <div key={item.id}>
-                    <h4>{item.title}</h4>
-                    <h4>{item.quantity}</h4>
-                    <h4>${item.variant.price}</h4>
-                </div>
-            ))}
+          >
+            <img src={item.variant.image.src} alt="" />
+          </div>
+          <div>
+            <h4 className="title is-4">{item.title}</h4>
+            <p className="subtitle is-5">${item.variant.price}</p>
+            <p className="subtitle is-5">Qty: {item.quantity}</p>
+            <button
+              onClick={() => removeProductFromCart(item.id)}
+              className="is-small button is-danger is-outlined"
+            >
+              Remove
+            </button>
+          </div>
         </div>
-    )
+      ))}
+      <hr />
+      Total:
+      <h5 className="title">＄{checkout.totalPrice}</h5>
+    </animated.div>
+  )
 }
 
 export default Cart

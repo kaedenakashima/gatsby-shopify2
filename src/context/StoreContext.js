@@ -8,10 +8,10 @@ const client = Client.buildClient({
 
 const defaultValues = {
   idCartOpen: false,
-  toggleCartOpen: () => {},
+  toggleCartOpen: () => { },
   cart: [],
-  addProductToCart: () => {},
-  removeProductFromCart: () => {},
+  addProductToCart: () => { },
+  removeProductFromCart: () => { },
   client,
   checkout: {
     lineItems: [],
@@ -19,6 +19,10 @@ const defaultValues = {
 }
 
 export const StoreContext = createContext(defaultValues)
+
+//check if it's a browser
+const isBrowser = typeof window !== "undefined"
+
 
 export const StoreProvider = ({ children }) => {
   const [checkout, setCheckout] = useState(defaultValues.checkout)
@@ -30,11 +34,20 @@ export const StoreProvider = ({ children }) => {
     initializeCheckout()
   }, [])
 
+  const getNewId = async () => {
+    try {
+      const newCheckout = await client.checkout.create()
+      if (isBrowser) {
+        localStorage.setItem("checkout_id", newCheckout.id)
+      }
+      return newCheckout
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
   const initializeCheckout = async () => {
     try {
-      //check if it's a browser
-      const isBrowser = typeof window !== "undefined"
-
       //check if id exists
       const currentCheckoutId = isBrowser
         ? localStorage.getItem("checkout_id")
@@ -45,20 +58,20 @@ export const StoreProvider = ({ children }) => {
       if (currentCheckoutId) {
         //if id exists, fetch checkout from shopify
         newCheckout = await client.checkout.fetch(currentCheckoutId)
+        if (newCheckout.completedAt) {
+          newCheckout = await getNewId()
+        }
       } else {
         // if id does not, create new checkout
-        newCheckout = await client.checkout.create()
-        if (isBrowser) {
-          localStorage.setItem("checkout_id", newCheckout.id)
-        }
+        newCheckout = await getNewId()
       }
-
       // set checkout to state
       setCheckout(newCheckout)
     } catch (e) {
       console.error(e)
     }
   }
+
   const addProductToCart = async variantId => {
     try {
       const lineItems = [
@@ -90,6 +103,11 @@ export const StoreProvider = ({ children }) => {
     }
   }
 
+  const checkCoupon = async (coupon) => {
+    const newCheckout = await client.checkout.addDiscount(checkout.id, coupon)
+    setCheckout(newCheckout)
+  }
+
   return (
     <StoreContext.Provider
       value={{
@@ -99,6 +117,7 @@ export const StoreProvider = ({ children }) => {
         toggleCartOpen,
         isCartOpen,
         removeProductFromCart,
+        checkCoupon,
       }}
     >
       {children}

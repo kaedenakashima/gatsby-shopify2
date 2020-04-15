@@ -1,4 +1,4 @@
-import React, { useContext } from "react"
+import React, { useContext, useState } from "react"
 import { animated } from "react-spring"
 import { StoreContext } from "../../context/StoreContext"
 
@@ -8,7 +8,10 @@ const Cart = ({ style }) => {
     checkout,
     toggleCartOpen,
     removeProductFromCart,
+    checkCoupon
   } = useContext(StoreContext)
+
+  const [coupon, setCoupon] = useState('')
 
   return (
     <animated.div
@@ -63,10 +66,36 @@ const Cart = ({ style }) => {
           </div>
         </div>
       ))}
+
+      <div>
+        <form onSubmit={(e) => {
+          e.preventDefault()
+          checkCoupon(coupon)
+        }}>
+          <div className="field">
+            <label htmlFor="coupon" className="label">Coupon</label>
+            <input
+              className="input"
+              id="coupon"
+              value={coupon}
+              onChange={e => setCoupon(e.target.value)}
+              type="text"
+            />
+          </div>
+          <button className="button">Add Coupon</button>
+        </form>
+      </div>
       <hr />
-      Total:
-      <h5 className="title">＄{checkout.totalPrice}</h5>
-    </animated.div>
+      <div>
+        Total:
+        <h5 className="title">＄{checkout.totalPrice}</h5>
+      </div>
+      <div style={{ marginTop: '2rem' }}>
+        <a href={checkout.webUrl} className="button is-fullwidth is-success">
+          Checkout Now
+        </a>
+      </div>
+    </animated.div >
   )
 }
 
